@@ -1,5 +1,4 @@
 export const Keyboard = (()=>{
-
     return {
         Up: false,
         Right: false,

@@ -1,16 +1,9 @@
 import { Keyboard } from "./keyboard.js";
-
-const Player = (()=>{
-   return {
-
-       x: 100,
-       y: 100
-   }
-});
+import { LevelOne } from "./LevelOne.js";
 
 const Main = (function() {
-    var vendors = ['webkit', 'moz'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+    let vendors = ['webkit', 'moz'];
+    for(let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
         window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
         window.cancelAnimationFrame =
             window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
@@ -30,10 +23,14 @@ const Main = (function() {
         currentTime  =    0,
         delta = 0;
 
-    var x = 100;
-    var y = 100;
+    let audio = document.querySelector("#AudioPlayer");
+    audio.src = "/SpaceShooterJS/audio/Level1.wav";
+    audio.loop = true;
+    audio.volume = 0.2;
+    audio.play();
 
     Keyboard.registerKeys(canvas);
+    let level = new LevelOne();
 
     function gameLoop() {
         window.requestAnimationFrame(gameLoop);
@@ -43,31 +40,27 @@ const Main = (function() {
 
         if(delta > interval) {
             cx.clearRect(0,0,cw,ch);
-
-            if(Keyboard.Up){
-                y -= 10;
+            cx.fillStyle = "black";
+            cx.fillRect(0,0,cw,ch);
+            if (!level.preloaded){
+                level.preload();
+                level.preloaded = true;
+            } else {
+                if (level.isLoaded()) {
+                    level.update();
+                    level.draw(cx);
+                } else {
+                    cx.font = "30px Arial";
+                    cx.fillText("LOADING", 170, 300);
+                }
             }
-            if(Keyboard.Right){
-                x += 10;
-            }
-            if(Keyboard.Down){
-                y += 10;
-            }
-            if(Keyboard.Left){
-                x -= 10;
-            }
-            cx.drawImage(img, x,y);
 
             lastTime = currentTime - (delta % interval);
         }
     }
 
-    var img = new Image(32,32);
-    img.src = "/SpaceShooterJS/img/PlayerShip.png";
-    img.addEventListener("load", () => {
-        if (typeof (canvas.getContext) !== undefined) {
-            cx = canvas.getContext('2d');
-            gameLoop();
-        }
-    }, false);
+    if (typeof (canvas.getContext) !== undefined) {
+        cx = canvas.getContext('2d');
+        gameLoop();
+    }
 })();
